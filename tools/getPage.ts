@@ -1,5 +1,4 @@
-import ChatService from "@token-ring/chat/ChatService";
-import type {Registry} from "@token-ring/registry";
+import Agent from "@tokenring-ai/agent/Agent";
 import {z} from "zod";
 import WikipediaService from "../WikipediaService.ts";
 
@@ -11,10 +10,10 @@ export async function execute(
   }: {
     title?: string;
   },
-  registry: Registry,
+  agent: Agent,
 ): Promise<{ content?: string }> {
-  const chat = registry.requireFirstServiceByType(ChatService);
-  const wikipedia = registry.requireFirstServiceByType(WikipediaService);
+  const chat = agent.requireFirstServiceByType(Agent);
+  const wikipedia = agent.requireFirstServiceByType(WikipediaService);
 
   if (!title) {
     throw new Error(`[${name}] title is required`);

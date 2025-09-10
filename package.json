@@ -1,11 +1,10 @@
 {
- "name": "@token-ring/wikipedia",
+ "name": "@tokenring-ai/wikipedia",
  "version": "0.1.0",
  "description": "Wikipedia search integration for Token Ring",
  "dependencies": {
-  "@token-ring/ai-client": "0.1.0",
-  "@token-ring/chat": "0.1.0",
-  "@token-ring/registry": "0.1.0",
+  "@tokenring-ai/ai-client": "0.1.0",
+  "@tokenring-ai/agent": "0.1.0",
   "zod": "^4.0.17"
  },
  "devDependencies": {

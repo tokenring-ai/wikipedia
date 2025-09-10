@@ -1,5 +1,5 @@
-import {Service} from "@token-ring/registry";
-import {doFetchWithRetry} from "@token-ring/utility/doFetchWithRetry";
+import {TokenRingService} from "@tokenring-ai/agent/types";
+import {doFetchWithRetry} from "@tokenring-ai/utility/doFetchWithRetry";
 
 export type WikipediaConfig = {
   baseUrl?: string;
@@ -11,13 +11,12 @@ export type WikipediaSearchOptions = {
   offset?: number;
 };
 
-export default class WikipediaService extends Service {
+export default class WikipediaService implements TokenRingService {
   name = "Wikipedia";
   description = "Service for searching Wikipedia articles";
-  private baseUrl: string;
+  private readonly baseUrl: string;
 
   constructor(config: WikipediaConfig = {}) {
-    super();
     this.baseUrl = config.baseUrl || "https://en.wikipedia.org";
   }
 
@@ -35,7 +34,7 @@ export default class WikipediaService extends Service {
     });
 
     const url = `${this.baseUrl}/w/api.php?${params}`;
-    
+
     const res = await doFetchWithRetry(url, {
       method: "GET",
       headers: {
@@ -55,7 +54,7 @@ export default class WikipediaService extends Service {
     });
 
     const url = `${this.baseUrl}/w/index.php?${params}`;
-    
+
     const res = await doFetchWithRetry(url, {
       method: "GET",
       headers: {

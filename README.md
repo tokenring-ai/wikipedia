@@ -12,7 +12,7 @@ Wikipedia search integration for TokenRing Writer.
 ## Usage
 
 ```typescript
-import WikipediaService from "@token-ring/wikipedia/WikipediaService";
+import WikipediaService from "@tokenring-ai/wikipedia/WikipediaService";
 
 // Default English Wikipedia
 const wikipedia = new WikipediaService();
