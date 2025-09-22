@@ -12,8 +12,8 @@ export async function execute(
   },
   agent: Agent,
 ): Promise<{ content?: string }> {
-  const chat = agent.requireFirstServiceByType(Agent);
-  const wikipedia = agent.requireFirstServiceByType(WikipediaService);
+  const chat = agent.requireServiceByType(Agent);
+  const wikipedia = agent.requireServiceByType(WikipediaService);
 
   if (!title) {
     throw new Error(`[${name}] title is required`);

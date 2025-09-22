@@ -16,8 +16,8 @@ export async function execute(
   },
   agent: Agent,
 ): Promise<{ results?: any }> {
-  const chat = agent.requireFirstServiceByType(Agent);
-  const wikipedia = agent.requireFirstServiceByType(WikipediaService);
+  const chat = agent.requireServiceByType(Agent);
+  const wikipedia = agent.requireServiceByType(WikipediaService);
 
   if (!query) {
     throw new Error(`[${name}] query is required`);
