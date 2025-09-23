@@ -12,7 +12,7 @@ export type WikipediaSearchOptions = {
 };
 
 export default class WikipediaService implements TokenRingService {
-  name = "Wikipedia";
+  name = "WikipediaService";
   description = "Service for searching Wikipedia articles";
   private readonly baseUrl: string;
 
