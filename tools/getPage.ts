@@ -12,7 +12,7 @@ export async function execute(
   },
   agent: Agent,
 ): Promise<{ content?: string }> {
-  const chat = agent.requireServiceByType(Agent);
+  
   const wikipedia = agent.requireServiceByType(WikipediaService);
 
   if (!title) {
@@ -20,7 +20,7 @@ export async function execute(
   }
 
   try {
-    chat.infoLine(`[wikipediaGetPage] Retrieving: ${title}`);
+    agent.infoLine(`[wikipediaGetPage] Retrieving: ${title}`);
     const content = await wikipedia.getPage(title);
     return {content};
   } catch (e: any) {

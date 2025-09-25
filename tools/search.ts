@@ -16,14 +16,14 @@ export async function execute(
   },
   agent: Agent,
 ): Promise<{ results?: any }> {
-  const chat = agent.requireServiceByType(Agent);
+  
   const wikipedia = agent.requireServiceByType(WikipediaService);
 
   if (!query) {
     throw new Error(`[${name}] query is required`);
   }
 
-  chat.infoLine(`[wikipediaSearch] Searching: ${query}`);
+  agent.infoLine(`[wikipediaSearch] Searching: ${query}`);
   const results = await wikipedia.search(query, {
     limit,
     offset,
