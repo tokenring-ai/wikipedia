@@ -1,5 +1,5 @@
 import {TokenRingService} from "@tokenring-ai/agent/types";
-import {doFetchWithRetry} from "@tokenring-ai/utility/doFetchWithRetry";
+import {HttpService} from "@tokenring-ai/utility/HttpService";
 
 export type WikipediaConfig = {
   baseUrl?: string;
@@ -11,12 +11,15 @@ export type WikipediaSearchOptions = {
   offset?: number;
 };
 
-export default class WikipediaService implements TokenRingService {
+export default class WikipediaService extends HttpService implements TokenRingService {
   name = "WikipediaService";
   description = "Service for searching Wikipedia articles";
-  private readonly baseUrl: string;
+  
+  protected baseUrl: string;
+  protected defaultHeaders = {"User-Agent": "TokenRing-Writer/1.0 (https://github.com/tokenring/writer)"};
 
   constructor(config: WikipediaConfig = {}) {
+    super();
     this.baseUrl = config.baseUrl || "https://en.wikipedia.org";
   }
 
@@ -33,16 +36,7 @@ export default class WikipediaService implements TokenRingService {
       sroffset: String(opts.offset || 0),
     });
 
-    const url = `${this.baseUrl}/w/api.php?${params}`;
-
-    const res = await doFetchWithRetry(url, {
-      method: "GET",
-      headers: {
-        "User-Agent": "TokenRing-Writer/1.0 (https://github.com/tokenring/writer)",
-      },
-    });
-
-    return await this.parseJsonOrThrow(res, "Wikipedia search");
+    return this.fetchJson(`/w/api.php?${params}`, {method: "GET"}, "Wikipedia search");
   }
 
   async getPage(title: string): Promise<string> {
@@ -53,13 +47,11 @@ export default class WikipediaService implements TokenRingService {
       action: "raw",
     });
 
+    const {doFetchWithRetry} = await import("@tokenring-ai/utility/doFetchWithRetry");
     const url = `${this.baseUrl}/w/index.php?${params}`;
-
     const res = await doFetchWithRetry(url, {
       method: "GET",
-      headers: {
-        "User-Agent": "TokenRing-Writer/1.0 (https://github.com/tokenring/writer)",
-      },
+      headers: this.defaultHeaders,
     });
 
     if (!res.ok) {
@@ -71,28 +63,5 @@ export default class WikipediaService implements TokenRingService {
     return await res.text();
   }
 
-  private async parseJsonOrThrow(res: Response, context: string): Promise<any> {
-    const text = await res.text().catch(() => "");
-    try {
-      const json = text ? JSON.parse(text) : undefined;
-      if (!res.ok) {
-        throw Object.assign(new Error(`${context} failed (${res.status})`), {
-          status: res.status,
-          details: json ?? text?.slice(0, 500),
-        });
-      }
-      return json;
-    } catch (e: any) {
-      if (res.ok) {
-        return text;
-      }
-      if (!e.status) {
-        throw Object.assign(new Error(`${context} failed (${res.status})`), {
-          status: res.status,
-          details: text?.slice(0, 500),
-        });
-      }
-      throw e;
-    }
-  }
+
 }
