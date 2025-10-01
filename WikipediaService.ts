@@ -1,4 +1,5 @@
 import {TokenRingService} from "@tokenring-ai/agent/types";
+import {doFetchWithRetry} from "@tokenring-ai/utility/doFetchWithRetry";
 import {HttpService} from "@tokenring-ai/utility/HttpService";
 
 export type WikipediaConfig = {
@@ -47,7 +48,7 @@ export default class WikipediaService extends HttpService implements TokenRingSe
       action: "raw",
     });
 
-    const {doFetchWithRetry} = await import("@tokenring-ai/utility/doFetchWithRetry");
+
     const url = `${this.baseUrl}/w/index.php?${params}`;
     const res = await doFetchWithRetry(url, {
       method: "GET",
