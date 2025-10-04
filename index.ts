@@ -1,13 +1,20 @@
-import {TokenRingPackage} from "@tokenring-ai/agent";
+import {AgentTeam, TokenRingPackage} from "@tokenring-ai/agent";
 import packageJSON from './package.json' with {type: 'json'};
 
 import * as tools from "./tools.ts";
+import WikipediaService, {WikipediaConfigSchema} from "./WikipediaService.ts";
 
 export const packageInfo: TokenRingPackage = {
   name: packageJSON.name,
   version: packageJSON.version,
   description: packageJSON.description,
-  tools
+  install(agentTeam: AgentTeam) {
+    agentTeam.addTools(packageInfo, tools);
+    const config = agentTeam.getConfigSlice('wikipedia', WikipediaConfigSchema.optional());
+    if (config) {
+      agentTeam.addServices(new WikipediaService(config));
+    }
+  },
 };
 
 

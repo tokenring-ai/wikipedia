@@ -1,10 +1,13 @@
 import {TokenRingService} from "@tokenring-ai/agent/types";
 import {doFetchWithRetry} from "@tokenring-ai/utility/doFetchWithRetry";
 import {HttpService} from "@tokenring-ai/utility/HttpService";
+import {z} from "zod";
 
-export type WikipediaConfig = {
-  baseUrl?: string;
-};
+export const WikipediaConfigSchema = z.object({
+  baseUrl: z.string().optional(),
+});
+
+export type WikipediaConfig = z.infer<typeof WikipediaConfigSchema>;
 
 export type WikipediaSearchOptions = {
   limit?: number;
