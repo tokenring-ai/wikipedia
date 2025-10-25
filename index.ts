@@ -9,7 +9,9 @@ export default {
   version: packageJSON.version,
   description: packageJSON.description,
   install(agentTeam: AgentTeam) {
-    agentTeam.addTools(packageJSON.name, tools);
+    agentTeam.waitForService(AIService, aiService =>
+      aiService.addTools(packageJSON.name, tools)
+    );
     const config = agentTeam.getConfigSlice('wikipedia', WikipediaConfigSchema.optional());
     if (config) {
       agentTeam.addServices(new WikipediaService(config));
