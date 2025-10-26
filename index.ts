@@ -1,4 +1,5 @@
 import {AgentTeam, TokenRingPackage} from "@tokenring-ai/agent";
+import {AIService} from "@tokenring-ai/ai-client";
 import packageJSON from './package.json' with {type: 'json'};
 
 import * as tools from "./tools.ts";
