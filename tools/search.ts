@@ -16,7 +16,7 @@ export async function execute(
   },
   agent: Agent,
 ): Promise<{ results?: any }> {
-  
+
   const wikipedia = agent.requireServiceByType(WikipediaService);
 
   if (!query) {

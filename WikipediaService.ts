@@ -18,7 +18,7 @@ export type WikipediaSearchOptions = {
 export default class WikipediaService extends HttpService implements TokenRingService {
   name = "WikipediaService";
   description = "Service for searching Wikipedia articles";
-  
+
   protected baseUrl: string;
   protected defaultHeaders = {"User-Agent": "TokenRing-Writer/1.0 (https://github.com/tokenring/writer)"};
 

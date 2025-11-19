@@ -12,7 +12,7 @@ export async function execute(
   },
   agent: Agent,
 ): Promise<{ content?: string }> {
-  
+
   const wikipedia = agent.requireServiceByType(WikipediaService);
 
   if (!title) {
