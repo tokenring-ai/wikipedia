@@ -1,19 +1,16 @@
 import Agent from "@tokenring-ai/agent/Agent";
+import {TokenRingToolDefinition} from "@tokenring-ai/chat/types";
 import {z} from "zod";
 import WikipediaService from "../WikipediaService.ts";
 
-export const name = "wikipedia/search";
+const name = "wikipedia/search";
 
-export async function execute(
+async function execute(
   {
     query,
     limit,
     offset,
-  }: {
-    query?: string;
-    limit?: number;
-    offset?: number;
-  },
+  }: z.infer<typeof inputSchema>,
   agent: Agent,
 ): Promise<{ results?: any }> {
 
@@ -31,10 +28,14 @@ export async function execute(
   return {results};
 }
 
-export const description = "Search Wikipedia articles. Returns structured JSON with search results.";
+const description = "Search Wikipedia articles. Returns structured JSON with search results.";
 
-export const inputSchema = z.object({
+const inputSchema = z.object({
   query: z.string().min(1).describe("Search query"),
   limit: z.number().int().positive().max(500).optional().describe("Number of results (1-500, default: 10)"),
   offset: z.number().int().min(0).optional().describe("Offset for pagination (default: 0)"),
 });
+
+export default {
+  name, description, inputSchema, execute,
+} as TokenRingToolDefinition<typeof inputSchema>;

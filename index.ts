@@ -1,5 +1,6 @@
-import {AgentTeam, TokenRingPackage} from "@tokenring-ai/agent";
+import TokenRingApp from "@tokenring-ai/app";
 import {ChatService} from "@tokenring-ai/chat";
+import {TokenRingPlugin} from "@tokenring-ai/app";
 import packageJSON from './package.json' with {type: 'json'};
 
 import * as tools from "./tools.ts";
@@ -9,16 +10,16 @@ export default {
   name: packageJSON.name,
   version: packageJSON.version,
   description: packageJSON.description,
-  install(agentTeam: AgentTeam) {
-    agentTeam.waitForService(ChatService, chatService =>
+  install(app: TokenRingApp) {
+    app.waitForService(ChatService, chatService =>
       chatService.addTools(packageJSON.name, tools)
     );
-    const config = agentTeam.getConfigSlice('wikipedia', WikipediaConfigSchema.optional());
+    const config = app.getConfigSlice('wikipedia', WikipediaConfigSchema.optional());
     if (config) {
-      agentTeam.addServices(new WikipediaService(config));
+      app.addServices(new WikipediaService(config));
     }
   },
-} as TokenRingPackage;
+} as TokenRingPlugin;
 
 
 export {default as WikipediaService} from "./WikipediaService.ts";

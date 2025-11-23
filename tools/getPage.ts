@@ -1,15 +1,14 @@
 import Agent from "@tokenring-ai/agent/Agent";
+import {TokenRingToolDefinition} from "@tokenring-ai/chat/types";
 import {z} from "zod";
 import WikipediaService from "../WikipediaService.ts";
 
-export const name = "wikipedia/getPage";
+const name = "wikipedia/getPage";
 
-export async function execute(
+async function execute(
   {
     title,
-  }: {
-    title?: string;
-  },
+  }: z.infer<typeof inputSchema>,
   agent: Agent,
 ): Promise<{ content?: string }> {
 
@@ -29,8 +28,12 @@ export async function execute(
   }
 }
 
-export const description = "Retrieve a Wikipedia page's raw wiki markup content by title.";
+const description = "Retrieve a Wikipedia page's raw wiki markup content by title.";
 
-export const inputSchema = z.object({
+const inputSchema = z.object({
   title: z.string().min(1).describe("Wikipedia page title"),
 });
+
+export default {
+  name, description, inputSchema, execute,
+} as TokenRingToolDefinition<typeof inputSchema>;

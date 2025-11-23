@@ -1,4 +1,4 @@
-import {TokenRingService} from "@tokenring-ai/agent/types";
+import {TokenRingService} from "@tokenring-ai/app/types";
 import {doFetchWithRetry} from "@tokenring-ai/utility/http/doFetchWithRetry";
 import {HttpService} from "@tokenring-ai/utility/http/HttpService";
 import {z} from "zod";
