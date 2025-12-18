@@ -20,4 +20,4 @@ export default {
       app.addServices(new WikipediaService(config));
     }
   },
-} as TokenRingPlugin;
+} satisfies TokenRingPlugin;
