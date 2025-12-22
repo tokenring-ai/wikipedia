@@ -3,7 +3,7 @@ import {TokenRingToolDefinition} from "@tokenring-ai/chat/types";
 import {z} from "zod";
 import WikipediaService from "../WikipediaService.ts";
 
-const name = "wikipedia/getPage";
+const name = "wikipedia_getPage";
 
 async function execute(
   {
