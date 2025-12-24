@@ -1,17 +1,17 @@
 # @tokenring-ai/wikipedia
 
-Wikipedia search integration for Token Ring AI agents. This package provides a service for interacting with the Wikipedia API and tools for AI agents to search articles and retrieve page content.
+Wikipedia search and content retrieval integration for Token Ring AI agents. This package provides a service for interacting with the Wikipedia API and tools for AI agents to search articles and retrieve raw wiki markup content.
 
 ## Overview
 
-The `@tokenring-ai/wikipedia` package enables seamless integration with the Wikipedia API for searching articles and retrieving raw page content. It is designed specifically for use within the Token Ring AI agent framework, allowing agents to query Wikipedia programmatically.
+The `@tokenring-ai/wikipedia` package enables seamless integration with the Wikipedia API for searching articles and retrieving raw content. It is designed specifically for use within the Token Ring AI agent framework, allowing agents to query Wikipedia programmatically.
 
 ### Key Features
 
 - **Wikipedia Service**: Core service for direct API interactions with Wikipedia
 - **Agent Tools**: Two pre-built tools for AI workflows:
-  - `wikipedia/search`: Search Wikipedia articles with configurable options
-  - `wikipedia/getPage`: Retrieve raw wiki markup content by page title
+  - `wikipedia_search`: Search Wikipedia articles with configurable options
+  - `wikipedia_getPage`: Retrieve raw wiki markup content by page title
 - **TypeScript Support**: Full TypeScript definitions and type safety
 - **Input Validation**: Zod schemas for robust input validation
 - **Error Handling**: Built-in error handling and retry logic
@@ -21,20 +21,22 @@ The `@tokenring-ai/wikipedia` package enables seamless integration with the Wiki
 ## Installation
 
 ```bash
-npm install @tokenring-ai/wikipedia
+bun install @tokenring-ai/wikipedia
 ```
 
 ## Dependencies
 
 This package depends on:
-- `@tokenring-ai/chat` ^0.1.0
-- `@tokenring-ai/agent` ^0.1.0
-- `@tokenring-ai/utility` ^0.1.0
+- `@tokenring-ai/app` ^0.2.0
+- `@tokenring-ai/chat` ^0.2.0
+- `@tokenring-ai/agent` ^0.2.0
+- `@tokenring-ai/utility` ^0.2.0
 - `zod` ^4.1.13
 
 Development dependencies:
 - `vitest` ^4.0.13
-- `@vitest/coverage-v8` ^4.0.13
+- `@vitest/coverage-v8` ^4.0.15
+- `typescript` ^5.0.0
 
 ## Usage
 
@@ -73,7 +75,7 @@ const pageContent = await wikipedia.getPage("Artificial intelligence");
 
 The package provides two tools that can be used by Token Ring agents:
 
-#### wikipedia/search
+#### wikipedia_search
 
 Search Wikipedia articles and return structured results.
 
@@ -86,13 +88,13 @@ Search Wikipedia articles and return structured results.
 }
 
 // Example usage:
-const result = await agent.executeTool("wikipedia/search", {
+const result = await agent.executeTool("wikipedia_search", {
   query: "machine learning",
   limit: 5
 });
 ```
 
-#### wikipedia/getPage
+#### wikipedia_getPage
 
 Retrieve the raw wiki markup content of a Wikipedia page by title.
 
@@ -103,7 +105,7 @@ Retrieve the raw wiki markup content of a Wikipedia page by title.
 }
 
 // Example usage:
-const result = await agent.executeTool("wikipedia/getPage", {
+const result = await agent.executeTool("wikipedia_getPage", {
   title: "Machine learning"
 });
 ```
@@ -152,7 +154,7 @@ Retrieve raw wiki markup content.
 #### WikipediaConfig
 
 ```typescript
-type WikipediaConfig = {
+export type WikipediaConfig = {
   baseUrl?: string;
 }
 ```
@@ -160,7 +162,7 @@ type WikipediaConfig = {
 #### WikipediaSearchOptions
 
 ```typescript
-type WikipediaSearchOptions = {
+export type WikipediaSearchOptions = {
   limit?: number;
   namespace?: number;
   offset?: number;
@@ -181,14 +183,15 @@ export const WikipediaConfigSchema = z.object({
 pkg/wikipedia/
 ├── index.ts                 # Main entry point and plugin export
 ├── WikipediaService.ts      # Core Wikipedia API service
-├── tools.ts                 # Tool exports
+├── plugin.ts               # Token Ring plugin integration
+├── tools.ts                # Tool exports
 ├── tools/
 │   ├── search.ts           # Wikipedia search tool
 │   └── getPage.ts          # Wikipedia page retrieval tool
 ├── test/
 │   └── WikipediaService.integration.test.js  # Integration tests
 ├── package.json            # Package metadata and dependencies
-├── vitest.config.js        # Vitest configuration
+├── vitest.config.ts        # Vitest configuration
 └── README.md              # This documentation
 ```
 
@@ -197,7 +200,7 @@ pkg/wikipedia/
 Run the test suite:
 
 ```bash
-npm test
+bun run test
 ```
 
 The package includes integration tests that verify:
@@ -273,7 +276,7 @@ if (searchResults.query.search.length > 0) {
 // In a Token Ring agent
 async function researchTopic(query: string) {
   // Search for relevant articles
-  const searchResult = await agent.executeTool("wikipedia/search", {
+  const searchResult = await agent.executeTool("wikipedia_search", {
     query,
     limit: 5
   });
@@ -281,7 +284,7 @@ async function researchTopic(query: string) {
   // Get content from the most relevant article
   if (searchResult.results?.query?.search?.length > 0) {
     const topArticle = searchResult.results.query.search[0];
-    const pageContent = await agent.executeTool("wikipedia/getPage", {
+    const pageContent = await agent.executeTool("wikipedia_getPage", {
       title: topArticle.title
     });
     
@@ -308,19 +311,15 @@ async function researchTopic(query: string) {
 
 ```bash
 # Install dependencies
-npm install
+bun install
 
 # Run tests
-npm test
+bun run test
 
 # Run tests with coverage
-npm run test:coverage
+bun run test:coverage
 ```
 
 ## License
 
 MIT License - see LICENSE file for details.
-
-## Support
-
-For issues and questions, please refer to the main Token Ring repository or create an issue in this package's repository.
