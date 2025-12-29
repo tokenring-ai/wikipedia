@@ -18,7 +18,6 @@ export default {
     app.waitForService(ChatService, chatService =>
       chatService.addTools(packageJSON.name, tools)
     );
-    // const config = app.getConfigSlice('wikipedia', WikipediaConfigSchema.optional());
     if (config.wikipedia) {
       app.addServices(new WikipediaService(config.wikipedia));
     }
