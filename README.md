@@ -24,100 +24,88 @@ The `@tokenring-ai/wikipedia` package enables seamless integration with the Wiki
 bun install @tokenring-ai/wikipedia
 ```
 
-## Dependencies
+## Chat Commands
 
-This package depends on:
-- `@tokenring-ai/app` ^0.2.0
-- `@tokenring-ai/chat` ^0.2.0
-- `@tokenring-ai/agent` ^0.2.0
-- `@tokenring-ai/utility` ^0.2.0
-- `zod` ^4.1.13
+This package does not define chat commands. The functionality is exposed through agent tools instead.
 
-Development dependencies:
-- `vitest` ^4.0.13
-- `@vitest/coverage-v8` ^4.0.15
-- `typescript` ^5.0.0
+## Plugin Configuration
 
-## Usage
+The plugin accepts a configuration object with optional Wikipedia settings:
 
-### As a Token Ring Plugin
+```typescript
+interface WikipediaPluginConfig {
+  wikipedia?: {
+    baseUrl?: string;  // Wikipedia API base URL (default: https://en.wikipedia.org)
+  }
+}
+```
 
-The package is designed to work as a Token Ring plugin. Import and install it in your app:
+**Example configuration:**
 
 ```typescript
 import TokenRingApp from "@tokenring-ai/app";
 import wikipediaPlugin from "@tokenring-ai/wikipedia";
 
 const app = new TokenRingApp();
-app.install(wikipediaPlugin);
+app.install(wikipediaPlugin, {
+  wikipedia: {
+    baseUrl: "https://en.wikipedia.org"  // Optional, defaults to English Wikipedia
+  }
+});
 ```
 
-### Direct Service Usage
+## Tools
 
-```typescript
-import WikipediaService from "@tokenring-ai/wikipedia";
+The package provides the following tools that can be used by Token Ring agents:
 
-const wikipedia = new WikipediaService({
-  baseUrl: "https://en.wikipedia.org" // Optional, defaults to English Wikipedia
-});
-
-// Search for articles
-const searchResults = await wikipedia.search("artificial intelligence", {
-  limit: 10,
-  offset: 0
-});
-
-// Get page content
-const pageContent = await wikipedia.getPage("Artificial intelligence");
-```
-
-### Agent Tool Usage
-
-The package provides two tools that can be used by Token Ring agents:
-
-#### wikipedia_search
+### wikipedia_search
 
 Search Wikipedia articles and return structured results.
 
+**Tool Input Schema:**
 ```typescript
-// Tool input schema:
-{
-  query: string,           // Required search term
-  limit?: number,          // Number of results (1-500, default: 10)
-  offset?: number          // Pagination offset (default: 0)
-}
-
-// Example usage:
-const result = await agent.executeTool("wikipedia_search", {
-  query: "machine learning",
-  limit: 5
-});
+z.object({
+  query: z.string().min(1).describe("Search query"),
+  limit: z.number().int().positive().max(500).optional().describe("Number of results (1-500, default: 10)"),
+  offset: z.number().int().min(0).optional().describe("Offset for pagination (default: 0)"),
+})
 ```
 
-#### wikipedia_getPage
+**Example usage:**
+```typescript
+const result = await agent.executeTool("wikipedia_search", {
+  query: "artificial intelligence",
+  limit: 5
+});
+// Returns: { results: { query: { search: [...] } } }
+```
+
+### wikipedia_getPage
 
 Retrieve the raw wiki markup content of a Wikipedia page by title.
 
+**Tool Input Schema:**
 ```typescript
-// Tool input schema:
-{
-  title: string           // Required page title
-}
+z.object({
+  title: z.string().min(1).describe("Wikipedia page title"),
+})
+```
 
-// Example usage:
+**Example usage:**
+```typescript
 const result = await agent.executeTool("wikipedia_getPage", {
   title: "Machine learning"
 });
+// Returns: { content: "{{Wiki markup content...}}" }
 ```
 
-## API Reference
+## Services
 
 ### WikipediaService
 
 The core service class for Wikipedia API interactions.
 
-#### Constructor
-
+**Constructor:**
 ```typescript
 constructor(config?: WikipediaConfig)
 ```
@@ -125,22 +113,22 @@ constructor(config?: WikipediaConfig)
 **Parameters:**
 - `config.baseUrl` (string, optional): Base URL for Wikipedia API (defaults to "https://en.wikipedia.org")
 
-#### Methods
+**Methods:**
 
-##### search(query: string, options?: WikipediaSearchOptions): Promise<any>
+#### search(query: string, options?: WikipediaSearchOptions): Promise<any>
 
 Search Wikipedia articles.
 
 **Parameters:**
 - `query` (string): Search term (required)
-- `options` (object, optional):
+- `options` (WikipediaSearchOptions, optional):
   - `limit` (number): Maximum number of results (default: 10)
   - `namespace` (number): Search namespace (default: 0)
   - `offset` (number): Pagination offset (default: 0)
 
-**Returns:** Promise resolving to Wikipedia API response
+**Returns:** Promise resolving to Wikipedia API search response
 
-##### getPage(title: string): Promise<string>
+#### getPage(title: string): Promise<string>
 
 Retrieve raw wiki markup content.
 
@@ -149,33 +137,57 @@ Retrieve raw wiki markup content.
 
 **Returns:** Promise resolving to raw wiki markup text
 
-### Types and Schemas
-
-#### WikipediaConfig
-
+**Example usage:**
 ```typescript
-export type WikipediaConfig = {
-  baseUrl?: string;
-}
-```
+import WikipediaService from "@tokenring-ai/wikipedia";
 
-#### WikipediaSearchOptions
-
-```typescript
-export type WikipediaSearchOptions = {
-  limit?: number;
-  namespace?: number;
-  offset?: number;
-}
-```
-
-#### Configuration Schema
-
-```typescript
-export const WikipediaConfigSchema = z.object({
-  baseUrl: z.string().optional(),
+const wikipedia = new WikipediaService({
+  baseUrl: "https://en.wikipedia.org"
 });
+
+// Search for articles
+const searchResults = await wikipedia.search("quantum computing", {
+  limit: 3
+});
+
+// Get page content
+const content = await wikipedia.getPage("Quantum computing");
 ```
+
+## Providers
+
+### WikipediaService Provider
+
+The `WikipediaService` is a TokenRingService that can be required by agents using the `requireServiceByType` method.
+
+**Provider Type:**
+```typescript
+import WikipediaService from "@tokenring-ai/wikipedia";
+
+// In an agent context
+const wikipedia = agent.requireServiceByType(WikipediaService);
+```
+
+**Usage in tools:**
+```typescript
+import Agent from "@tokenring-ai/agent/Agent";
+import {z} from "zod";
+import WikipediaService from "../WikipediaService.ts";
+
+async function execute({query}: z.infer<typeof inputSchema>, agent: Agent): Promise<any> {
+  const wikipedia = agent.requireServiceByType(WikipediaService);
+  const results = await wikipedia.search(query, {limit: 10});
+  return {results};
+}
+```
+
+## RPC Endpoints
+
+This package does not define RPC endpoints.
+
+## State Management
+
+This package does not implement state persistence or restoration.
 
 ## Package Structure
 
@@ -183,16 +195,14 @@ export const WikipediaConfigSchema = z.object({
 pkg/wikipedia/
 ├── index.ts                 # Main entry point and plugin export
 ├── WikipediaService.ts      # Core Wikipedia API service
-├── plugin.ts               # Token Ring plugin integration
-├── tools.ts                # Tool exports
+├── plugin.ts                # Token Ring plugin integration
+├── tools.ts                 # Tool exports
 ├── tools/
-│   ├── search.ts           # Wikipedia search tool
-│   └── getPage.ts          # Wikipedia page retrieval tool
-├── test/
-│   └── WikipediaService.integration.test.js  # Integration tests
-├── package.json            # Package metadata and dependencies
-├── vitest.config.ts        # Vitest configuration
-└── README.md              # This documentation
+│   ├── search.ts            # Wikipedia search tool
+│   └── getPage.ts           # Wikipedia page retrieval tool
+├── package.json             # Package metadata and dependencies
+├── vitest.config.ts         # Vitest configuration
+└── README.md                # This documentation
 ```
 
 ## Testing
@@ -209,6 +219,11 @@ The package includes integration tests that verify:
 - Error handling for invalid inputs
 - Support for different language editions
 
+**Test commands:**
+- `bun run test` - Run all tests
+- `bun run test:watch` - Run tests in watch mode
+- `bun run test:coverage` - Run tests with coverage report
+
 ## Configuration
 
 ### Base URL Configuration
@@ -216,6 +231,8 @@ The package includes integration tests that verify:
 You can configure the service to use different Wikipedia language editions:
 
 ```typescript
+import WikipediaService from "@tokenring-ai/wikipedia";
+
 // English Wikipedia (default)
 const englishWiki = new WikipediaService();
 
@@ -245,6 +262,18 @@ The service includes comprehensive error handling:
 - **API failures**: Handles HTTP errors and non-OK responses
 - **Network issues**: Uses retry logic for transient failures
 - **JSON parsing**: Validates and sanitizes API responses
+
+**Error examples:**
+```typescript
+// Empty query throws error
+await wikipedia.search("");  // Error: "query is required"
+
+// Empty title throws error
+await wikipedia.getPage("");  // Error: "title is required"
+
+// Failed page retrieval
+await wikipedia.getPage("NonExistentPage");  // Error with status code
+```
 
 ## Examples
 
@@ -280,46 +309,45 @@ async function researchTopic(query: string) {
     query,
     limit: 5
   });
-  
+
   // Get content from the most relevant article
   if (searchResult.results?.query?.search?.length > 0) {
     const topArticle = searchResult.results.query.search[0];
     const pageContent = await agent.executeTool("wikipedia_getPage", {
       title: topArticle.title
     });
-    
+
     return {
       title: topArticle.title,
       snippet: topArticle.snippet,
       content: pageContent.content
     };
   }
-  
+
   throw new Error("No relevant articles found");
 }
 ```
 
-## Contributing
+### Multi-language Wikipedia
 
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Ensure all tests pass
-5. Submit a pull request
+```typescript
+import WikipediaService from "@tokenring-ai/wikipedia";
 
-### Development
+// Search in multiple languages
+const enWiki = new WikipediaService({baseUrl: "https://en.wikipedia.org"});
+const deWiki = new WikipediaService({baseUrl: "https://de.wikipedia.org"});
+const jaWiki = new WikipediaService({baseUrl: "https://ja.wikipedia.org"});
 
-```bash
-# Install dependencies
-bun install
+// English search
+const enResults = await enWiki.search("artificial intelligence", {limit: 5});
 
-# Run tests
-bun run test
+// German search
+const deResults = await deWiki.search("Kuenstliche Intelligenz", {limit: 5});
 
-# Run tests with coverage
-bun run test:coverage
+// Japanese search
+const jaResults = await jaWiki.search("人工知能", {limit: 5});
 ```
 
 ## License
 
-MIT License - see LICENSE file for details.
+MIT License - see [LICENSE](./LICENSE) file for details.
