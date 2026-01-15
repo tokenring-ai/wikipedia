@@ -20,7 +20,7 @@ async function execute(
     throw new Error(`[${name}] query is required`);
   }
 
-  agent.infoLine(`[wikipediaSearch] Searching: ${query}`);
+  agent.infoMessage(`[wikipediaSearch] Searching: ${query}`);
   const results = await wikipedia.search(query, {
     limit,
     offset,

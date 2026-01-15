@@ -19,7 +19,7 @@ async function execute(
   }
 
   try {
-    agent.infoLine(`[wikipediaGetPage] Retrieving: ${title}`);
+    agent.infoMessage(`[wikipediaGetPage] Retrieving: ${title}`);
     const content = await wikipedia.getPage(title);
     return {content};
   } catch (e: any) {
