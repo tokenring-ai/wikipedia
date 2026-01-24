@@ -4,6 +4,7 @@ import {z} from "zod";
 import WikipediaService from "../WikipediaService.ts";
 
 const name = "wikipedia_getPage";
+const displayName = "Wikipedia/getPage";
 
 async function execute(
   {
@@ -35,5 +36,5 @@ const inputSchema = z.object({
 });
 
 export default {
-  name, description, inputSchema, execute,
+  name, displayName, description, inputSchema, execute,
 } satisfies TokenRingToolDefinition<typeof inputSchema>;
