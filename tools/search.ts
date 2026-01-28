@@ -1,5 +1,5 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingToolDefinition} from "@tokenring-ai/chat/schema";
+import {TokenRingToolDefinition, type TokenRingToolJSONResult} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import WikipediaService from "../WikipediaService.ts";
 
@@ -11,22 +11,18 @@ async function execute(
     query,
     limit,
     offset,
-  }: z.infer<typeof inputSchema>,
+  }: z.output<typeof inputSchema>,
   agent: Agent,
-): Promise<{ results?: any }> {
+): Promise<TokenRingToolJSONResult<any>> {
 
   const wikipedia = agent.requireServiceByType(WikipediaService);
-
-  if (!query) {
-    throw new Error(`[${name}] query is required`);
-  }
 
   agent.infoMessage(`[wikipediaSearch] Searching: ${query}`);
   const results = await wikipedia.search(query, {
     limit,
     offset,
   });
-  return {results};
+  return { type: 'json' as const, data: results };
 }
 
 const description = "Search Wikipedia articles. Returns structured JSON with search results.";

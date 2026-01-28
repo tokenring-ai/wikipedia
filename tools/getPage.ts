@@ -1,5 +1,5 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingToolDefinition} from "@tokenring-ai/chat/schema";
+import {TokenRingToolDefinition, type TokenRingToolTextResult} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import WikipediaService from "../WikipediaService.ts";
 
@@ -9,20 +9,15 @@ const displayName = "Wikipedia/getPage";
 async function execute(
   {
     title,
-  }: z.infer<typeof inputSchema>,
+  }: z.output<typeof inputSchema>,
   agent: Agent,
-): Promise<{ content?: string }> {
+): Promise<TokenRingToolTextResult> {
 
   const wikipedia = agent.requireServiceByType(WikipediaService);
 
-  if (!title) {
-    throw new Error(`[${name}] title is required`);
-  }
-
   try {
     agent.infoMessage(`[wikipediaGetPage] Retrieving: ${title}`);
-    const content = await wikipedia.getPage(title);
-    return {content};
+    return await wikipedia.getPage(title);
   } catch (e: any) {
     const message = e?.message || String(e);
     throw new Error(`[${name}] ${message}`);
