@@ -4,10 +4,10 @@ import {HttpService} from "@tokenring-ai/utility/http/HttpService";
 import {z} from "zod";
 
 export const WikipediaConfigSchema = z.object({
-  baseUrl: z.string().optional(),
+  baseUrl: z.string().default("https://en.wikipedia.org")
 });
 
-export type WikipediaConfig = z.infer<typeof WikipediaConfigSchema>;
+export type ParsedWikipediaConfig = z.output<typeof WikipediaConfigSchema>;
 
 export type WikipediaSearchOptions = {
   limit?: number;
@@ -22,9 +22,9 @@ export default class WikipediaService extends HttpService implements TokenRingSe
   protected baseUrl: string;
   protected defaultHeaders = {"User-Agent": "TokenRing-Writer/1.0 (https://github.com/tokenring/writer)"};
 
-  constructor(config: WikipediaConfig = {}) {
+  constructor(readonly options: ParsedWikipediaConfig) {
     super();
-    this.baseUrl = config.baseUrl || "https://en.wikipedia.org";
+    this.baseUrl = options.baseUrl;
   }
 
   async search(query: string, opts: WikipediaSearchOptions = {}): Promise<any> {
