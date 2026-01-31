@@ -63,6 +63,7 @@ The package provides the following tools that can be used by Token Ring agents:
 Search Wikipedia articles and return structured results.
 
 **Tool Input Schema:**
+
 ```typescript
 z.object({
   query: z.string().min(1).describe("Search query"),
@@ -72,12 +73,13 @@ z.object({
 ```
 
 **Example usage:**
+
 ```typescript
 const result = await agent.executeTool("wikipedia_search", {
   query: "artificial intelligence",
   limit: 5
 });
-// Returns: { results: { query: { search: [...] } } }
+// Returns: { type: 'json', data: { query: { search: [...] } } }
 ```
 
 ### wikipedia_getPage
@@ -85,6 +87,7 @@ const result = await agent.executeTool("wikipedia_search", {
 Retrieve the raw wiki markup content of a Wikipedia page by title.
 
 **Tool Input Schema:**
+
 ```typescript
 z.object({
   title: z.string().min(1).describe("Wikipedia page title"),
@@ -92,11 +95,12 @@ z.object({
 ```
 
 **Example usage:**
+
 ```typescript
 const result = await agent.executeTool("wikipedia_getPage", {
   title: "Machine learning"
 });
-// Returns: { content: "{{Wiki markup content...}}" }
+// Returns: { type: 'text', data: "{{Wiki markup content...}}" }
 ```
 
 ## Services
@@ -106,22 +110,25 @@ const result = await agent.executeTool("wikipedia_getPage", {
 The core service class for Wikipedia API interactions.
 
 **Constructor:**
+
 ```typescript
-constructor(config?: WikipediaConfig)
+constructor(options: ParsedWikipediaConfig)
 ```
 
 **Parameters:**
-- `config.baseUrl` (string, optional): Base URL for Wikipedia API (defaults to "https://en.wikipedia.org")
+
+- `baseUrl` (string, optional): Base URL for Wikipedia API (defaults to "https://en.wikipedia.org")
 
 **Methods:**
 
-#### search(query: string, options?: WikipediaSearchOptions): Promise<any>
+#### search(query: string, opts?: WikipediaSearchOptions): Promise<any>
 
 Search Wikipedia articles.
 
 **Parameters:**
+
 - `query` (string): Search term (required)
-- `options` (WikipediaSearchOptions, optional):
+- `opts` (WikipediaSearchOptions, optional):
   - `limit` (number): Maximum number of results (default: 10)
   - `namespace` (number): Search namespace (default: 0)
   - `offset` (number): Pagination offset (default: 0)
@@ -133,11 +140,13 @@ Search Wikipedia articles.
 Retrieve raw wiki markup content.
 
 **Parameters:**
+
 - `title` (string): Wikipedia page title (required)
 
 **Returns:** Promise resolving to raw wiki markup text
 
 **Example usage:**
+
 ```typescript
 import WikipediaService from "@tokenring-ai/wikipedia";
 
@@ -161,6 +170,7 @@ const content = await wikipedia.getPage("Quantum computing");
 The `WikipediaService` is a TokenRingService that can be required by agents using the `requireServiceByType` method.
 
 **Provider Type:**
+
 ```typescript
 import WikipediaService from "@tokenring-ai/wikipedia";
 
@@ -169,6 +179,7 @@ const wikipedia = agent.requireServiceByType(WikipediaService);
 ```
 
 **Usage in tools:**
+
 ```typescript
 import Agent from "@tokenring-ai/agent/Agent";
 import {z} from "zod";
@@ -200,6 +211,7 @@ pkg/wikipedia/
 ├── tools/
 │   ├── search.ts            # Wikipedia search tool
 │   └── getPage.ts           # Wikipedia page retrieval tool
+├── schema.ts                # Zod configuration schema
 ├── package.json             # Package metadata and dependencies
 ├── vitest.config.ts         # Vitest configuration
 └── README.md                # This documentation
@@ -250,6 +262,7 @@ const frenchWiki = new WikipediaService({
 ### User-Agent
 
 The service uses a custom User-Agent header for API requests:
+
 ```
 TokenRing-Writer/1.0 (https://github.com/tokenring/writer)
 ```
@@ -264,6 +277,7 @@ The service includes comprehensive error handling:
 - **JSON parsing**: Validates and sanitizes API responses
 
 **Error examples:**
+
 ```typescript
 // Empty query throws error
 await wikipedia.search("");  // Error: "query is required"
@@ -320,7 +334,7 @@ async function researchTopic(query: string) {
     return {
       title: topArticle.title,
       snippet: topArticle.snippet,
-      content: pageContent.content
+      content: pageContent.data
     };
   }
 
