@@ -16,7 +16,7 @@ export type WikipediaSearchOptions = {
 };
 
 export default class WikipediaService extends HttpService implements TokenRingService {
-  name = "WikipediaService";
+  readonly name = "WikipediaService";
   description = "Service for searching Wikipedia articles";
 
   protected baseUrl: string;

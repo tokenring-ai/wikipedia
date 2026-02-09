@@ -246,7 +246,7 @@ You can configure the service to use different Wikipedia language editions:
 import WikipediaService from "@tokenring-ai/wikipedia";
 
 // English Wikipedia (default)
-const englishWiki = new WikipediaService();
+const englishWiki = new WikipediaService(WikipediaConfigSchema.parse({}));
 
 // Spanish Wikipedia
 const spanishWiki = new WikipediaService({
@@ -296,7 +296,7 @@ await wikipedia.getPage("NonExistentPage");  // Error with status code
 ```typescript
 import WikipediaService from "@tokenring-ai/wikipedia";
 
-const wikipedia = new WikipediaService();
+const wikipedia = new WikipediaService(WikipediaConfigSchema.parse({}));
 
 // Search for articles
 const searchResults = await wikipedia.search("quantum computing", {

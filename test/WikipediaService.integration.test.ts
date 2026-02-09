@@ -1,9 +1,9 @@
 import {describe, expect, it} from "vitest";
-import WikipediaService from "../WikipediaService.ts";
+import WikipediaService, {WikipediaConfigSchema} from "../WikipediaService.ts";
 
 describe("WikipediaService Integration Tests", () => {
  it("should search English Wikipedia successfully", async () => {
-  const wikipedia = new WikipediaService();
+  const wikipedia = new WikipediaService(WikipediaConfigSchema.parse({}));
   const result = await wikipedia.search("artificial intelligence", {
    limit: 3,
   });
@@ -29,7 +29,7 @@ describe("WikipediaService Integration Tests", () => {
  });
 
  it("should handle pagination with offset", async () => {
-  const wikipedia = new WikipediaService();
+  const wikipedia = new WikipediaService(WikipediaConfigSchema.parse({}));
   const result = await wikipedia.search("science", {limit: 2, offset: 5});
 
   expect(result.query.search).toBeInstanceOf(Array);
@@ -37,12 +37,12 @@ describe("WikipediaService Integration Tests", () => {
  });
 
  it("should throw error for empty query", async () => {
-  const wikipedia = new WikipediaService();
+  const wikipedia = new WikipediaService(WikipediaConfigSchema.parse({}));
   await expect(wikipedia.search("")).rejects.toThrow("query is required");
  });
 
  it("should retrieve page content by title", async () => {
-  const wikipedia = new WikipediaService();
+  const wikipedia = new WikipediaService(WikipediaConfigSchema.parse({}));
   const content = await wikipedia.getPage("Pet door");
 
   expect(content).toBeDefined();
@@ -52,7 +52,7 @@ describe("WikipediaService Integration Tests", () => {
  });
 
  it("should throw error for empty title", async () => {
-  const wikipedia = new WikipediaService();
+  const wikipedia = new WikipediaService(WikipediaConfigSchema.parse({}));
   await expect(wikipedia.getPage("")).rejects.toThrow("title is required");
  });
 });
