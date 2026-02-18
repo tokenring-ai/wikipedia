@@ -33,11 +33,12 @@ This package does not define chat commands. The functionality is exposed through
 The plugin accepts a configuration object with optional Wikipedia settings:
 
 ```typescript
-interface WikipediaPluginConfig {
-  wikipedia?: {
-    baseUrl?: string;  // Wikipedia API base URL (default: https://en.wikipedia.org)
-  }
-}
+import {WikipediaConfigSchema} from "@tokenring-ai/wikipedia";
+
+// Configuration schema
+WikipediaConfigSchema.parse({
+  baseUrl: "https://en.wikipedia.org"  // Optional, defaults to English Wikipedia
+});
 ```
 
 **Example configuration:**
@@ -51,6 +52,22 @@ app.install(wikipediaPlugin, {
   wikipedia: {
     baseUrl: "https://en.wikipedia.org"  // Optional, defaults to English Wikipedia
   }
+});
+```
+
+## Agent Configuration
+
+The Wikipedia service can be configured when added to an agent. The service configuration is available through the `WikipediaConfigSchema`:
+
+```typescript
+import WikipediaService, {WikipediaConfigSchema} from "@tokenring-ai/wikipedia";
+
+// Create service with default configuration
+const service = new WikipediaService(WikipediaConfigSchema.parse({}));
+
+// Create service with custom configuration
+const spanishService = new WikipediaService({
+  baseUrl: "https://es.wikipedia.org"
 });
 ```
 
@@ -117,7 +134,8 @@ constructor(options: ParsedWikipediaConfig)
 
 **Parameters:**
 
-- `baseUrl` (string, optional): Base URL for Wikipedia API (defaults to "https://en.wikipedia.org")
+- `options` (ParsedWikipediaConfig): Configuration options
+  - `baseUrl` (string, optional): Base URL for Wikipedia API (defaults to "https://en.wikipedia.org")
 
 **Methods:**
 
@@ -163,9 +181,7 @@ const searchResults = await wikipedia.search("quantum computing", {
 const content = await wikipedia.getPage("Quantum computing");
 ```
 
-## Providers
-
-### WikipediaService Provider
+### Service Provider Pattern
 
 The `WikipediaService` is a TokenRingService that can be required by agents using the `requireServiceByType` method.
 
@@ -192,6 +208,10 @@ async function execute({query}: z.infer<typeof inputSchema>, agent: Agent): Prom
 }
 ```
 
+## Providers
+
+This package does not use a provider registry pattern. The WikipediaService is a standalone service class that implements TokenRingService.
+
 ## RPC Endpoints
 
 This package does not define RPC endpoints.
@@ -205,15 +225,16 @@ This package does not implement state persistence or restoration.
 ```
 pkg/wikipedia/
 ├── index.ts                 # Main entry point and plugin export
-├── WikipediaService.ts      # Core Wikipedia API service
+├── WikipediaService.ts      # Core Wikipedia API service and schema
 ├── plugin.ts                # Token Ring plugin integration
 ├── tools.ts                 # Tool exports
 ├── tools/
 │   ├── search.ts            # Wikipedia search tool
 │   └── getPage.ts           # Wikipedia page retrieval tool
-├── schema.ts                # Zod configuration schema
 ├── package.json             # Package metadata and dependencies
 ├── vitest.config.ts         # Vitest configuration
+├── test/
+│   └── WikipediaService.integration.test.ts  # Integration tests
 └── README.md                # This documentation
 ```
 
@@ -226,12 +247,15 @@ bun run test
 ```
 
 The package includes integration tests that verify:
-- Wikipedia search functionality
+
+- Wikipedia search functionality with various parameters
 - Page content retrieval
 - Error handling for invalid inputs
 - Support for different language editions
+- Pagination with offset support
 
 **Test commands:**
+
 - `bun run test` - Run all tests
 - `bun run test:watch` - Run tests in watch mode
 - `bun run test:coverage` - Run tests with coverage report
@@ -243,7 +267,7 @@ The package includes integration tests that verify:
 You can configure the service to use different Wikipedia language editions:
 
 ```typescript
-import WikipediaService from "@tokenring-ai/wikipedia";
+import WikipediaService, {WikipediaConfigSchema} from "@tokenring-ai/wikipedia";
 
 // English Wikipedia (default)
 const englishWiki = new WikipediaService(WikipediaConfigSchema.parse({}));
@@ -261,11 +285,13 @@ const frenchWiki = new WikipediaService({
 
 ### User-Agent
 
-The service uses a custom User-Agent header for API requests:
+The service uses a custom User-Agent header for API requests by default:
 
 ```
 TokenRing-Writer/1.0 (https://github.com/tokenring/writer)
 ```
+
+This is configured automatically and does not require manual configuration.
 
 ## Error Handling
 
@@ -361,6 +387,22 @@ const deResults = await deWiki.search("Kuenstliche Intelligenz", {limit: 5});
 // Japanese search
 const jaResults = await jaWiki.search("人工知能", {limit: 5});
 ```
+
+## Dependencies
+
+### Production Dependencies
+
+- `@tokenring-ai/app` - Base application framework with service management
+- `@tokenring-ai/chat` - Chat and tool integration
+- `@tokenring-ai/agent` - Agent framework and execution
+- `@tokenring-ai/utility` - Shared utilities including HTTP helpers
+- `zod` - Schema validation
+
+### Development Dependencies
+
+- `vitest` - Testing framework
+- `@vitest/coverage-v8` - Code coverage
+- `typescript` - TypeScript support
 
 ## License
 
