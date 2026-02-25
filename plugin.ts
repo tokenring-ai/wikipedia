@@ -7,7 +7,7 @@ import tools from "./tools.ts";
 import WikipediaService, {WikipediaConfigSchema} from "./WikipediaService.ts";
 
 const packageConfigSchema = z.object({
-  wikipedia: WikipediaConfigSchema.optional()
+  wikipedia: WikipediaConfigSchema.prefault({})
 });
 
 export default {
@@ -18,9 +18,7 @@ export default {
     app.waitForService(ChatService, chatService =>
       chatService.addTools(tools)
     );
-    if (config.wikipedia) {
-      app.addServices(new WikipediaService(config.wikipedia));
-    }
+    app.addServices(new WikipediaService(config.wikipedia));
   },
   config: packageConfigSchema
 } satisfies TokenRingPlugin<typeof packageConfigSchema>;
