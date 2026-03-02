@@ -124,7 +124,7 @@ const result = await agent.executeTool("wikipedia_getPage", {
 
 ### WikipediaService
 
-The core service class for Wikipedia API interactions.
+The core service class for Wikipedia API interactions. Implements `TokenRingService` interface.
 
 **Constructor:**
 
@@ -137,11 +137,17 @@ constructor(options: ParsedWikipediaConfig)
 - `options` (ParsedWikipediaConfig): Configuration options
   - `baseUrl` (string, optional): Base URL for Wikipedia API (defaults to "https://en.wikipedia.org")
 
+**Properties:**
+
+- `name` (string): Service name - "WikipediaService"
+- `description` (string): Service description - "Service for searching Wikipedia articles"
+- `options` (ParsedWikipediaConfig): Service configuration
+
 **Methods:**
 
 #### search(query: string, opts?: WikipediaSearchOptions): Promise<any>
 
-Search Wikipedia articles.
+Search Wikipedia articles and return structured results.
 
 **Parameters:**
 
@@ -151,17 +157,32 @@ Search Wikipedia articles.
   - `namespace` (number): Search namespace (default: 0)
   - `offset` (number): Pagination offset (default: 0)
 
-**Returns:** Promise resolving to Wikipedia API search response
+**Returns:** Promise resolving to Wikipedia API search response with structure:
+```typescript
+{
+  query: {
+    search: Array<{
+      title: string;
+      snippet: string;
+      // ... other search result properties
+    }>
+  }
+}
+```
+
+**Throws:** Error if query is empty or API request fails
 
 #### getPage(title: string): Promise<string>
 
-Retrieve raw wiki markup content.
+Retrieve raw wiki markup content of a Wikipedia page.
 
 **Parameters:**
 
 - `title` (string): Wikipedia page title (required)
 
 **Returns:** Promise resolving to raw wiki markup text
+
+**Throws:** Error if title is empty or page retrieval fails
 
 **Example usage:**
 
@@ -179,6 +200,7 @@ const searchResults = await wikipedia.search("quantum computing", {
 
 // Get page content
 const content = await wikipedia.getPage("Quantum computing");
+console.log(content); // Raw wiki markup
 ```
 
 ### Service Provider Pattern
@@ -210,7 +232,7 @@ async function execute({query}: z.infer<typeof inputSchema>, agent: Agent): Prom
 
 ## Providers
 
-This package does not use a provider registry pattern. The WikipediaService is a standalone service class that implements TokenRingService.
+This package does not use a provider registry pattern. The `WikipediaService` is a standalone service class that implements `TokenRingService`.
 
 ## RPC Endpoints
 
@@ -218,7 +240,7 @@ This package does not define RPC endpoints.
 
 ## State Management
 
-This package does not implement state persistence or restoration.
+This package does not implement state persistence or restoration. The service is stateless and maintains no internal state between calls.
 
 ## Package Structure
 
@@ -299,7 +321,7 @@ The service includes comprehensive error handling:
 
 - **Invalid inputs**: Throws descriptive errors for missing required parameters
 - **API failures**: Handles HTTP errors and non-OK responses
-- **Network issues**: Uses retry logic for transient failures
+- **Network issues**: Uses retry logic via `doFetchWithRetry` for transient failures
 - **JSON parsing**: Validates and sanitizes API responses
 
 **Error examples:**
@@ -388,6 +410,37 @@ const deResults = await deWiki.search("Kuenstliche Intelligenz", {limit: 5});
 const jaResults = await jaWiki.search("人工知能", {limit: 5});
 ```
 
+### Tool Implementation Example
+
+```typescript
+import Agent from "@tokenring-ai/agent/Agent";
+import {TokenRingToolDefinition} from "@tokenring-ai/chat/schema";
+import {z} from "zod";
+import WikipediaService from "../WikipediaService.ts";
+
+const inputSchema = z.object({
+  query: z.string().min(1).describe("Search query"),
+  limit: z.number().int().positive().max(500).optional(),
+});
+
+async function execute({query, limit}: z.infer<typeof inputSchema>, agent: Agent) {
+  const wikipedia = agent.requireServiceByType(WikipediaService);
+  
+  agent.infoMessage(`[wikipediaSearch] Searching: ${query}`);
+  const results = await wikipedia.search(query, {limit});
+  
+  return { type: 'json' as const, data: results };
+}
+
+const searchTool = {
+  name: "wikipedia_search",
+  displayName: "Wikipedia/search",
+  description: "Search Wikipedia articles",
+  inputSchema,
+  execute,
+} satisfies TokenRingToolDefinition<typeof inputSchema>;
+```
+
 ## Dependencies
 
 ### Production Dependencies
@@ -395,7 +448,7 @@ const jaResults = await jaWiki.search("人工知能", {limit: 5});
 - `@tokenring-ai/app` - Base application framework with service management
 - `@tokenring-ai/chat` - Chat and tool integration
 - `@tokenring-ai/agent` - Agent framework and execution
-- `@tokenring-ai/utility` - Shared utilities including HTTP helpers
+- `@tokenring-ai/utility` - Shared utilities including HTTP helpers (`doFetchWithRetry`)
 - `zod` - Schema validation
 
 ### Development Dependencies
@@ -403,6 +456,12 @@ const jaResults = await jaWiki.search("人工知能", {limit: 5});
 - `vitest` - Testing framework
 - `@vitest/coverage-v8` - Code coverage
 - `typescript` - TypeScript support
+
+## Related Components
+
+- `@tokenring-ai/research` - Research service that may integrate Wikipedia functionality
+- `@tokenring-ai/websearch` - General web search integration
+- `@tokenring-ai/browser` - Browser-based content retrieval
 
 ## License
 
