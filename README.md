@@ -515,6 +515,16 @@ pkg/wikipedia/
 └── README.md                   # This documentation
 ```
 
+## Exports
+
+The package exports the following:
+
+- `WikipediaService` - Main service class (default export from `index.ts`)
+- `WikipediaConfigSchema` - Zod schema for configuration validation
+- `ParsedWikipediaConfig` - TypeScript type for parsed configuration
+- `WikipediaSearchOptions` - Type for search options
+- `tools` - Object containing all tool definitions (`search` and `getPage`)
+
 ## Dependencies
 
 ### Production Dependencies
@@ -527,9 +537,9 @@ pkg/wikipedia/
 
 ### Development Dependencies
 
-- `vitest` - Testing framework (^4.1.0)
-- `@vitest/coverage-v8` - Code coverage (^4.1.0)
-- `typescript` - TypeScript support (^5.9.3)
+- `vitest` - Testing framework (^4.1.1)
+- `@vitest/coverage-v8` - Code coverage (^4.1.1)
+- `typescript` - TypeScript support (^6.0.2)
 
 ## Related Components
 
