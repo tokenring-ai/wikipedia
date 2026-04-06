@@ -12,6 +12,7 @@ const packageConfigSchema = z.object({
 
 export default {
   name: packageJSON.name,
+  displayName: "Wikipedia Integration",
   version: packageJSON.version,
   description: packageJSON.description,
   install(app, config) {
