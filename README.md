@@ -49,7 +49,7 @@ constructor(options: ParsedWikipediaConfig)
 **Parameters:**
 
 - `options` (ParsedWikipediaConfig): Configuration options
-  - `baseUrl` (string, optional): Base URL for Wikipedia API (defaults to "https://en.wikipedia.org")
+  - `baseUrl` (string, optional): Base URL for Wikipedia API (defaults to "<https://en.wikipedia.org>")
 
 **Properties:**
 
@@ -74,6 +74,7 @@ Search Wikipedia articles and return structured results.
   - `offset` (number): Pagination offset (default: 0)
 
 **Returns:** Promise resolving to Wikipedia API search response with structure:
+
 ```typescript
 {
   query: {
@@ -130,6 +131,7 @@ The package exports two tools via the `tools` module:
 **Description:** Search Wikipedia articles. Returns structured JSON with search results.
 
 **Input Schema:**
+
 ```typescript
 z.object({
   query: z.string().min(1).describe("Search query"),
@@ -141,6 +143,7 @@ z.object({
 **Returns:** JSON result with search data
 
 **Example:**
+
 ```typescript
 const result = await agent.executeTool("wikipedia_search", {
   query: "artificial intelligence",
@@ -155,6 +158,7 @@ const result = await agent.executeTool("wikipedia_search", {
 **Description:** Retrieve a Wikipedia page's raw wiki markup content by title.
 
 **Input Schema:**
+
 ```typescript
 z.object({
   title: z.string().min(1).describe("Wikipedia page title"),
@@ -164,6 +168,7 @@ z.object({
 **Returns:** Text result with raw wiki markup content
 
 **Example:**
+
 ```typescript
 const content = await agent.executeTool("wikipedia_getPage", {
   title: "Machine learning"
@@ -352,6 +357,7 @@ app.install(wikipediaPlugin, {
 ```
 
 The plugin automatically:
+
 1. Registers the `WikipediaService` with the app
 2. Adds the Wikipedia tools to the `ChatService`
 
