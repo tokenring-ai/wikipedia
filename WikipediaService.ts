@@ -1,7 +1,7 @@
-import type {TokenRingService} from "@tokenring-ai/app/types";
-import {doFetchWithRetry} from "@tokenring-ai/utility/http/doFetchWithRetry";
-import {HttpService} from "@tokenring-ai/utility/http/HttpService";
-import {z} from "zod";
+import type { TokenRingService } from "@tokenring-ai/app/types";
+import { doFetchWithRetry } from "@tokenring-ai/utility/http/doFetchWithRetry";
+import { HttpService } from "@tokenring-ai/utility/http/HttpService";
+import { z } from "zod";
 
 export const WikipediaConfigSchema = z.object({
   baseUrl: z.string().default("https://en.wikipedia.org"),
@@ -10,14 +10,12 @@ export const WikipediaConfigSchema = z.object({
 export type ParsedWikipediaConfig = z.output<typeof WikipediaConfigSchema>;
 
 export type WikipediaSearchOptions = {
-  limit?: number;
-  namespace?: number;
-  offset?: number;
+  limit?: number | undefined;
+  namespace?: number | undefined;
+  offset?: number | undefined;
 };
 
-export default class WikipediaService
-  extends HttpService
-  implements TokenRingService {
+export default class WikipediaService extends HttpService implements TokenRingService {
   readonly name = "WikipediaService";
   description = "Service for searching Wikipedia articles";
 
@@ -44,11 +42,7 @@ export default class WikipediaService
       sroffset: String(opts.offset || 0),
     });
 
-    return this.fetchJson(
-      `/w/api.php?${params}`,
-      {method: "GET"},
-      "Wikipedia search",
-    );
+    return this.fetchJson(`/w/api.php?${params}`, { method: "GET" }, "Wikipedia search");
   }
 
   async getPage(title: string): Promise<string> {
@@ -66,12 +60,9 @@ export default class WikipediaService
     });
 
     if (!res.ok) {
-      throw Object.assign(
-        new Error(`Wikipedia page retrieval failed (${res.status})`),
-        {
-          status: res.status,
-        },
-      );
+      throw Object.assign(new Error(`Wikipedia page retrieval failed (${res.status})`), {
+        status: res.status,
+      });
     }
 
     return await res.text();

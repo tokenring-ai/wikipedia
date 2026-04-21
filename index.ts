@@ -1,1 +1,1 @@
-export {default as WikipediaService} from "./WikipediaService.ts";
+export { default as WikipediaService } from "./WikipediaService.ts";
