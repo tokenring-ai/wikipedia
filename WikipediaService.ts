@@ -1,6 +1,8 @@
 import type { TokenRingService } from "@tokenring-ai/app/types";
+import type { JSONValue } from "@tokenring-ai/utility/json/safeParse";
+import { JSONValueSchema } from "@tokenring-ai/utility/json/schema";
 import { doFetchWithRetry } from "@tokenring-ai/utility/http/doFetchWithRetry";
-import { HttpService } from "@tokenring-ai/utility/http/HttpService";
+import { HTTPRetriever } from "@tokenring-ai/utility/http/HTTPRetriever";
 import { z } from "zod";
 
 export const WikipediaConfigSchema = z.object({
@@ -15,21 +17,21 @@ export type WikipediaSearchOptions = {
   offset?: number | undefined;
 };
 
-export default class WikipediaService extends HttpService implements TokenRingService {
+export default class WikipediaService implements TokenRingService {
   readonly name = "WikipediaService";
   description = "Service for searching Wikipedia articles";
 
-  protected baseUrl: string;
-  protected defaultHeaders = {
-    "User-Agent": "TokenRing-Writer/1.0 (https://github.com/tokenring/writer)",
-  };
+  private readonly retriever: HTTPRetriever;
 
   constructor(readonly options: ParsedWikipediaConfig) {
-    super();
-    this.baseUrl = options.baseUrl;
+    this.retriever = new HTTPRetriever({
+      baseUrl: options.baseUrl,
+      headers: { "User-Agent": "TokenRing-Writer/1.0 (https://github.com/tokenring/writer)" },
+      timeout: 10_000,
+    });
   }
 
-  search(query: string, opts: WikipediaSearchOptions = {}): Promise<any> {
+  search(query: string, opts: WikipediaSearchOptions = {}): Promise<JSONValue> {
     if (!query) throw new Error("query is required");
 
     const params = new URLSearchParams({
@@ -42,7 +44,12 @@ export default class WikipediaService extends HttpService implements TokenRingSe
       sroffset: String(opts.offset || 0),
     });
 
-    return this.fetchJson(`/w/api.php?${params}`, { method: "GET" }, "Wikipedia search");
+    return this.retriever.fetchValidatedJson({
+      url: `/w/api.php?${params}`,
+      opts: { method: "GET" },
+      schema: JSONValueSchema,
+      context: "Wikipedia search",
+    });
   }
 
   async getPage(title: string): Promise<string> {
@@ -53,10 +60,10 @@ export default class WikipediaService extends HttpService implements TokenRingSe
       action: "raw",
     });
 
-    const url = `${this.baseUrl}/w/index.php?${params}`;
+    const url = `${this.options.baseUrl}/w/index.php?${params}`;
     const res = await doFetchWithRetry(url, {
       method: "GET",
-      headers: this.defaultHeaders,
+      headers: { "User-Agent": "TokenRing-Writer/1.0 (https://github.com/tokenring/writer)" },
     });
 
     if (!res.ok) {
