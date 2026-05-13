@@ -1,12 +1,11 @@
-import {describe, expect, it, vi, beforeEach, afterEach} from "vitest";
-import WikipediaService, {WikipediaConfigSchema} from "../WikipediaService.ts";
+import { doFetchWithRetry } from "@tokenring-ai/utility/http/doFetchWithRetry";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import WikipediaService, { WikipediaConfigSchema } from "../WikipediaService.ts";
 
 // Mock the doFetchWithRetry function
 vi.mock("@tokenring-ai/utility/http/doFetchWithRetry", () => ({
   doFetchWithRetry: vi.fn(),
 }));
-
-import {doFetchWithRetry} from "@tokenring-ai/utility/http/doFetchWithRetry";
 
 describe("WikipediaService Integration Tests", () => {
   beforeEach(() => {
@@ -24,9 +23,9 @@ describe("WikipediaService Integration Tests", () => {
       text: () => Promise.resolve(JSON.stringify({
         query: {
           search: [
-            {title: "Artificial intelligence", snippet: "Test snippet"},
-            {title: "Machine learning", snippet: "Test snippet 2"},
-            {title: "Deep learning", snippet: "Test snippet 3"},
+            { title: "Artificial intelligence", snippet: "Test snippet" },
+            { title: "Machine learning", snippet: "Test snippet 2" },
+            { title: "Deep learning", snippet: "Test snippet 3" },
           ],
         },
       })),
@@ -53,8 +52,8 @@ describe("WikipediaService Integration Tests", () => {
       text: () => Promise.resolve(JSON.stringify({
         query: {
           search: [
-            {title: "Inteligencia artificial", snippet: "Test snippet"},
-            {title: "Aprendizaje automático", snippet: "Test snippet 2"},
+            { title: "Inteligencia artificial", snippet: "Test snippet" },
+            { title: "Aprendizaje automático", snippet: "Test snippet 2" },
           ],
         },
       })),
@@ -81,8 +80,8 @@ describe("WikipediaService Integration Tests", () => {
       text: () => Promise.resolve(JSON.stringify({
         query: {
           search: [
-            {title: "Science", snippet: "Test snippet"},
-            {title: "Scientific method", snippet: "Test snippet 2"},
+            { title: "Science", snippet: "Test snippet" },
+            { title: "Scientific method", snippet: "Test snippet 2" },
           ],
         },
       })),
@@ -91,7 +90,7 @@ describe("WikipediaService Integration Tests", () => {
     vi.mocked(doFetchWithRetry).mockResolvedValue(mockResponse);
 
     const wikipedia = new WikipediaService(WikipediaConfigSchema.parse({}));
-    const result = await wikipedia.search("science", {limit: 2, offset: 5});
+    const result = await wikipedia.search("science", { limit: 2, offset: 5 });
 
     expect(result.query.search).toBeInstanceOf(Array);
     expect(result.query.search.length).toBeLessThanOrEqual(2);
@@ -154,7 +153,7 @@ A pet door is a small door...
 
     const wikipedia = new WikipediaService(WikipediaConfigSchema.parse({}));
     const result = await wikipedia.search("test");
-    
+
     // Should return empty object when JSON parsing fails
     expect(result).toBeDefined();
   });

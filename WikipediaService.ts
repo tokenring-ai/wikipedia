@@ -1,8 +1,8 @@
 import type { TokenRingService } from "@tokenring-ai/app/types";
-import type { JSONValue } from "@tokenring-ai/utility/json/safeParse";
-import { JSONValueSchema } from "@tokenring-ai/utility/json/schema";
 import { doFetchWithRetry } from "@tokenring-ai/utility/http/doFetchWithRetry";
 import { HTTPRetriever } from "@tokenring-ai/utility/http/HTTPRetriever";
+import type { JSONValue } from "@tokenring-ai/utility/json/safeParse";
+import { JSONValueSchema } from "@tokenring-ai/utility/json/schema";
 import { z } from "zod";
 
 export const WikipediaConfigSchema = z.object({

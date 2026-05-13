@@ -1,17 +1,20 @@
 # @tokenring-ai/wikipedia
 
-Wikipedia search and content retrieval integration for Token Ring AI agents. This package provides a service for interacting with the Wikipedia API and tools for AI agents to search articles and retrieve raw wiki markup content.
+Wikipedia search and content retrieval integration for Token Ring AI agents. This package provides a service for
+interacting with the Wikipedia API and tools for AI agents to search articles and retrieve raw wiki markup content.
 
 ## Overview
 
-The `@tokenring-ai/wikipedia` package enables seamless integration with the Wikipedia API for searching articles and retrieving raw content. It is designed specifically for use within the Token Ring AI agent framework, allowing agents to query Wikipedia programmatically.
+The `@tokenring-ai/wikipedia` package enables seamless integration with the Wikipedia API for searching articles and
+retrieving raw content. It is designed specifically for use within the Token Ring AI agent framework, allowing agents to
+query Wikipedia programmatically.
 
 ### Key Features
 
 - **WikipediaService**: Core service for direct API interactions with Wikipedia
 - **Agent Tools**: Two pre-built tools for AI workflows:
-  - `wikipedia_search`: Search Wikipedia articles with configurable options
-  - `wikipedia_getPage`: Retrieve raw wiki markup content by page title
+- `wikipedia_search`: Search Wikipedia articles with configurable options
+- `wikipedia_getPage`: Retrieve raw wiki markup content by page title
 - **TypeScript Support**: Full TypeScript definitions and type safety
 - **Input Validation**: Zod schemas for robust input validation
 - **Error Handling**: Built-in error handling for invalid inputs and API failures
@@ -38,7 +41,8 @@ bun install @tokenring-ai/wikipedia
 
 ### WikipediaService
 
-The core service class for Wikipedia API interactions. Extends `HttpService` and implements `TokenRingService` interface.
+The core service class for Wikipedia API interactions. Implements `TokenRingService` interface.
+Uses `HTTPRetriever` for HTTP requests with built-in retry logic.
 
 **Constructor:**
 
@@ -49,19 +53,17 @@ constructor(options: ParsedWikipediaConfig)
 **Parameters:**
 
 - `options` (ParsedWikipediaConfig): Configuration options
-  - `baseUrl` (string, optional): Base URL for Wikipedia API (defaults to "<https://en.wikipedia.org>")
+- `baseUrl` (string, optional): Base URL for Wikipedia API (defaults to `<https://en.wikipedia.org>`)
 
 **Properties:**
 
 - `name` (string): Service name - "WikipediaService"
 - `description` (string): Service description - "Service for searching Wikipedia articles"
 - `options` (ParsedWikipediaConfig): Service configuration
-- `baseUrl` (string): The configured Wikipedia base URL
-- `defaultHeaders` (object): Default HTTP headers including User-Agent
 
 **Methods:**
 
-#### search(query: string, opts?: WikipediaSearchOptions): Promise<any>
+#### search(query: string, opts?: WikipediaSearchOptions): Promise<JSONValue>
 
 Search Wikipedia articles and return structured results.
 
@@ -69,9 +71,9 @@ Search Wikipedia articles and return structured results.
 
 - `query` (string): Search term (required)
 - `opts` (WikipediaSearchOptions, optional):
-  - `limit` (number): Maximum number of results (default: 10)
-  - `namespace` (number): Search namespace (default: 0)
-  - `offset` (number): Pagination offset (default: 0)
+- `limit` (number): Maximum number of results (default: 10)
+- `namespace` (number): Search namespace (default: 0)
+- `offset` (number): Pagination offset (default: 0)
 
 **Returns:** Promise resolving to Wikipedia API search response with structure:
 
@@ -135,8 +137,8 @@ The package exports two tools via the `tools` module:
 ```typescript
 z.object({
   query: z.string().min(1).describe("Search query"),
-  limit: z.number().int().positive().max(500).optional().describe("Number of results (1-500, default: 10)"),
-  offset: z.number().int().min(0).optional().describe("Offset for pagination (default: 0)"),
+  limit: z.number().int().positive().max(500).exactOptional().describe("Number of results (1-500, default: 10)"),
+  offset: z.number().int().min(0).exactOptional().describe("Offset for pagination (default: 0)"),
 })
 ```
 
@@ -253,16 +255,20 @@ const jaResults = await jaWiki.search("人工知能", { limit: 5 });
 
 ```typescript
 import tools from "@tokenring-ai/wikipedia/tools";
+import { tools as namedTools, wikipedia_search, wikipedia_getPage } from "@tokenring-ai/wikipedia/tools";
 import WikipediaService from "@tokenring-ai/wikipedia";
 import Agent from "@tokenring-ai/agent";
 
 // Create service
 const wikipedia = new WikipediaService({});
 
-// Register tools with agent
+// Register tools with agent (default export is an array)
 const agent = new Agent();
 agent.addServices(wikipedia);
 agent.addTools(tools);
+
+// Or register individual tools
+agent.addTools(wikipedia_search, wikipedia_getPage);
 
 // Execute search tool
 const searchResult = await agent.executeTool("wikipedia_search", {
@@ -327,11 +333,11 @@ WikipediaConfigSchema = z.object({
 
 The service uses a custom User-Agent header for API requests by default:
 
-```
+```text
 TokenRing-Writer/1.0 (https://github.com/tokenring/writer)
 ```
 
-This is configured automatically in the `defaultHeaders` property and does not require manual configuration.
+This is configured automatically in the `HTTPRetriever` and does not require manual configuration.
 
 ## Integration
 
@@ -363,7 +369,8 @@ The plugin automatically:
 
 ### Service Registration
 
-The plugin automatically registers the `WikipediaService` when installed. The service is available via the provider pattern:
+The plugin automatically registers the `WikipediaService` when installed. The service is available via the provider
+pattern:
 
 ```typescript
 import WikipediaService from "@tokenring-ai/wikipedia";
@@ -401,7 +408,7 @@ app.addServices(new WikipediaService({}));
 
 // Register tools
 app.waitForService(ChatService, chatService =>
-  chatService.addTools(tools)
+  chatService.addTools(...tools)
 );
 ```
 
@@ -411,11 +418,12 @@ This package does not define RPC endpoints.
 
 ## State Management
 
-This package does not implement state persistence or restoration. The service is stateless and maintains no internal state between calls.
+This package does not implement state persistence or restoration. The service is stateless and maintains no internal
+state between calls.
 
 ## Best Practices
 
-### Error Handling
+### Error Handling in API Calls
 
 Always handle errors when calling Wikipedia API methods:
 
@@ -505,9 +513,9 @@ describe("WikipediaService", () => {
 
 ## Package Structure
 
-```
+```text
 pkg/wikipedia/
-├── index.ts                    # Main entry point - exports WikipediaService
+├── index.ts                    # Main entry point - exports WikipediaService and schemas
 ├── plugin.ts                   # Token Ring plugin integration
 ├── WikipediaService.ts         # Core Wikipedia API service and schema
 ├── tools.ts                    # Tool exports (search and getPage)
@@ -523,13 +531,19 @@ pkg/wikipedia/
 
 ## Exports
 
-The package exports the following:
+The package exports the following from `index.ts`:
 
-- `WikipediaService` - Main service class (default export from `index.ts`)
+- `WikipediaService` - Main service class (default export)
 - `WikipediaConfigSchema` - Zod schema for configuration validation
 - `ParsedWikipediaConfig` - TypeScript type for parsed configuration
 - `WikipediaSearchOptions` - Type for search options
-- `tools` - Object containing all tool definitions (`search` and `getPage`)
+
+The package exports the following from `tools.ts`:
+
+- Default export: Array of tools `[search, getPage]` for spreading into `addTools()`
+- `wikipedia_search` - Named export for the search tool
+- `wikipedia_getPage` - Named export for the getPage tool
+- `tools` - Object containing `{ search, getPage }` for named access
 
 ## Dependencies
 
@@ -538,13 +552,12 @@ The package exports the following:
 - `@tokenring-ai/app` - Base application framework with service management
 - `@tokenring-ai/chat` - Chat and tool integration
 - `@tokenring-ai/agent` - Agent framework and execution
-- `@tokenring-ai/utility` - Shared utilities including HTTP helpers (`doFetchWithRetry`)
+- `@tokenring-ai/utility` - Shared utilities including HTTP helpers (`doFetchWithRetry`, `HTTPRetriever`)
 - `zod` - Schema validation (^4.3.6)
 
 ### Development Dependencies
 
 - `vitest` - Testing framework (^4.1.1)
-- `@vitest/coverage-v8` - Code coverage (^4.1.1)
 - `typescript` - TypeScript support (^6.0.2)
 
 ## Related Components
@@ -553,7 +566,7 @@ The package exports the following:
 - `@tokenring-ai/websearch` - General web search integration
 - `@tokenring-ai/browser` - Browser-based content retrieval
 
-## Error Handling
+## Service Error Handling
 
 The service includes comprehensive error handling:
 
