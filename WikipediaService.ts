@@ -1,5 +1,4 @@
 import type { TokenRingService } from "@tokenring-ai/app/types";
-import { doFetchWithRetry } from "@tokenring-ai/utility/http/doFetchWithRetry";
 import { HTTPRetriever } from "@tokenring-ai/utility/http/HTTPRetriever";
 import type { JSONValue } from "@tokenring-ai/utility/json/safeParse";
 import { JSONValueSchema } from "@tokenring-ai/utility/json/schema";
@@ -60,18 +59,11 @@ export default class WikipediaService implements TokenRingService {
       action: "raw",
     });
 
-    const url = `${this.options.baseUrl}/w/index.php?${params}`;
-    const res = await doFetchWithRetry(url, {
-      method: "GET",
-      headers: { "User-Agent": "TokenRing-Writer/1.0 (https://github.com/tokenring/writer)" },
-    });
-
-    if (!res.ok) {
-      throw Object.assign(new Error(`Wikipedia page retrieval failed (${res.status})`), {
-        status: res.status,
-      });
+    const url = `/w/index.php?${params}`;
+    try {
+      return await this.retriever.fetchText({ url, context: "Wikipedia Page Retrieval" });
+    } catch (err: unknown) {
+      throw new Error(`Wikipedia page retrieval failed`, { cause: err });
     }
-
-    return await res.text();
   }
 }

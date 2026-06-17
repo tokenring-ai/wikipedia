@@ -8,15 +8,9 @@ const displayName = "Wikipedia/getPage";
 
 async function execute({ title }: z.output<typeof inputSchema>, agent: Agent): Promise<TokenRingToolResult> {
   const wikipedia = agent.requireServiceByType(WikipediaService);
+  agent.infoMessage(`[wikipediaGetPage] Retrieving: ${title}`);
 
-  try {
-    agent.infoMessage(`[wikipediaGetPage] Retrieving: ${title}`);
-
-    return await wikipedia.getPage(title);
-  } catch (e: any) {
-    const message = e?.message || String(e);
-    throw new Error(`[${name}] ${message}`);
-  }
+  return await wikipedia.getPage(title);
 }
 
 const description = "Retrieve a Wikipedia page's raw wiki markup content by title.";
